@@ -1,0 +1,19 @@
+mixin showMessage
+  div
+    if(flash)
+      if(flash.success)
+        each message in flash.success
+          div(class="alert alert-success") #{message}
+    if(flash)
+      if(flash.info)
+        each message in flash.info
+          div(class="alert alert-info") #{message}
+    if(flash)
+      if(flash.warning)
+        each message in flash.warning
+          div(class="alert alert-warning") #{message}
+    if(flash)
+      if(flash.error)
+        each message in flash.error
+          div(class="alert alert-danger") #{message}
+    

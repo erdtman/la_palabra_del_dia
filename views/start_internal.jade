@@ -1,0 +1,17 @@
+extends ../views/layout
+
+include ../views/showMessage.jade
+
+block head
+  title La palabra del día
+  link(href="/static/bootstrap/css/signin.css" rel="stylesheet")
+
+block content
+  +showMessage()
+  form(class="form-signin" action="/create" method="post")
+    a(class="btn btn-lg btn-primary btn-block" href="/#{user._id}/add") Add word
+    a(class="btn btn-lg btn-success btn-block" href="/#{user._id}/known") List known words
+    a(class="btn btn-lg btn-danger btn-block" href="/#{user._id}/unknown") List unknown words
+    a(class="btn btn-lg btn-warning btn-block" href="/#{user._id}/settings") Settings
+  
+block footer

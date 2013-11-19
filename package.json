@@ -1,0 +1,25 @@
+{
+  "name": "serenity_service",
+  "version": "0.0.1",
+  "repository": {
+    "type":"git",
+    "url":"ssh://git@bitbucket.org/samuelerdtman/serenity_service"
+  },
+  "dependencies": {
+    "express": "3.4.x",
+    "mongodb": "1.3.x",
+    "connect-flash": "0.1.x",
+    "mocha" : "1.13.x",
+    "jade" : "0.35.x",
+    "winston": "0.7.x",
+    "pushover-notifications" : "0.1.x",
+    "nodemailer" : "0.5.x"
+  },
+  "engines": {
+    "node": "0.10.21",
+    "npm": "1.3.11"
+  },
+  "scripts": {
+    "test": "mocha -u tdd"
+  }
+}

@@ -1,0 +1,44 @@
+extends ../views/layout
+
+include ../views/showMessage.jade
+
+block head
+  title Settings - La palabra del día
+
+block content
+  h1 Settings
+  +showMessage()
+  form(role="form" action="" method="post")
+    div(class="form-group")
+      label(for="email") Email
+      input(type="email" class="form-control" id="email" name="email" placeholder="Enter email" value="#{user.email?user.email:''}")
+    div(class="form-group")
+      label(for="pushover_id") Pushover Id
+      input(type="text" class="form-control" name="pushover_id" id="pushover_id" placeholder="Enter Pushover Id" value="#{user.pushover_id?user.pushover_id:''}")
+    div(class="form-group")
+      label(for="words_per_day") Words/day
+      select(class="form-control" name="words_per_day" id="words_per_day")
+        if user.words_per_day == 1 
+          option(selected="selected") 1
+          option 2
+          option 3
+          option 4  
+        else if user.words_per_day == 2
+          option 1
+          option(selected="selected") 2
+          option 3
+          option 4  
+        else if user.words_per_day == 3
+          option 1
+          option 2
+          option(selected="selected") 3
+          option 4  
+        else if user.words_per_day == 4
+          option 1
+          option 2
+          option 3
+          option(selected="selected") 4  
+        
+    button(type="submit" class="btn btn-primary") Save
+
+block footer

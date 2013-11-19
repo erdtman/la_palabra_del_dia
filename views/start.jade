@@ -1,0 +1,18 @@
+extends layout
+
+include showMessage.jade
+
+block head
+  title La palabra del día
+  link(href="/static/bootstrap/css/signin.css" rel="stylesheet")
+
+block content
+  form(class="form-signin" action="/create" method="post")
+    h2(class="form-signin-heading") Welcome!
+    +showMessage();
+    p Register or get a link to your account 
+    +showMessage()
+    input(type="text" style="margin-bottom: 0.2cm" class="form-control" name="email" placeholder="Email address" autofocus="autofocus")
+    button(class="btn btn-lg btn-primary btn-block" type="submit") Proceed
+
+block footer
