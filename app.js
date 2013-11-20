@@ -89,7 +89,7 @@ app.post('/create', function(req, res) {
           from : "La palabra del día <palabra@erdtman.se>",
           to : user.email,
           subject : "Account",
-          text : util.format("http://lapalabradeldia.herokuapp.com/%s", user._id)
+          text : util.format("http://palabra.herokuapp.com/%s", user._id)
         }, function(error, response) {
           if (error) {
             console.log(error);
@@ -346,7 +346,7 @@ var timer = function() {
 
       pushover.send({
         user : user.pushover_id,
-        message : util.format("http://lapalabradeldia.herokuapp.com/%s/%s", user._id, word._id),
+        message : util.format("http://palabra.herokuapp.com/%s/%s", user._id, word._id),
         title : util.format("The word '%s'. ", word.word),
       }, function(error, result) {
         console.log("error: %j", error);

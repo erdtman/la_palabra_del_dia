@@ -1,7 +1,7 @@
 eclipse.preferences.version=1
 encoding//views/add_word.jade=UTF-8
 encoding//views/answer.jade=UTF-8
-encoding//views/layout.jade=UTF-8
+encoding//views/general/layout.jade=UTF-8
 encoding//views/list_known.jade=UTF-8
 encoding//views/list_unknown_words.jade=UTF-8
 encoding//views/question.jade=UTF-8
