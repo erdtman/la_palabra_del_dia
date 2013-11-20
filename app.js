@@ -29,9 +29,11 @@ app.configure(function() {
   app.set('view engine', 'jade');
   app.use(express.bodyParser());
   app.use(express.methodOverride());
-  app.use(express.cookieParser());
+  app.use(express.cookieParser('keyboard cat'));
   app.use(express.session({
-    secret : '498f99f3bbee4ae3a074bada02488464'
+    cookie : {
+      maxAge : 60000
+    }
   }));
   app.use(flash());
   app.use(app.router);
@@ -42,9 +44,15 @@ app.configure(function() {
   }));
 });
 
+app.get('/clear', function(req, res) {
+  storage.dropDatabase(function() {
+    res.send("clean");
+  });
+});
+
 app.get('/', function(req, res) {
   res.render('start.jade', {
-    flash : flash()
+    flash : req.flash()
   });
 });
 
@@ -60,7 +68,7 @@ app.post('/create', function(req, res) {
         from : "La palabra del día <palabra@erdtman.se>",
         to : user.email,
         subject : "Account",
-        text : util.format("http://localhost:5001/%s", user._id)
+        text : util.format("http://lapalabradeldia.herokuapp.com/%s", user._id)
       }, function(error, response) {
         if (error) {
           console.log(error);
@@ -83,7 +91,7 @@ app.post('/create', function(req, res) {
           from : "La palabra del día <palabra@erdtman.se>",
           to : user.email,
           subject : "Account",
-          text : util.format("http://localhost:5001/%s", user._id)
+          text : util.format("http://lapalabradeldia.herokuapp.com/%s", user._id)
         }, function(error, response) {
           if (error) {
             console.log(error);
@@ -111,7 +119,7 @@ app.get('/:id', function(req, res) {
     }
     res.render('start_internal.jade', {
       user : user,
-      flash : flash()
+      flash : req.flash()
     });
   });
 });
@@ -129,7 +137,7 @@ app.get('/:id/add', function(req, res) {
 
     res.render('add_word.jade', {
       user : user,
-      flash : flash()
+      flash : req.flash()
     });
   });
 });
@@ -152,7 +160,7 @@ app.post('/:id/add', function(req, res) {
       tests : 0
     }, function(error, word) {
       console.log(word);
-      req.flash("error", "'" + word.word + "' has been added");
+      req.flash("success", "'" + word.word + "' has been added");
       res.redirect("/" + req.params.id + "/add");
     });
   });
@@ -179,7 +187,7 @@ app.get('/:id/unknown', function(req, res) {
       res.render('list_unknown_words.jade', {
         user : user,
         words : words,
-        flash : flash()
+        flash : req.flash()
       });
     });
   });
@@ -205,7 +213,7 @@ app.get('/:id/known', function(req, res) {
       res.render('list_known.jade', {
         user : user,
         words : words,
-        flash : flash()
+        flash : req.flash()
       });
     });
   });
@@ -222,7 +230,7 @@ app.get('/:id/settings', function(req, res) {
 
     res.render('settings.jade', {
       user : user,
-      flash : flash()
+      flash : req.flash()
     });
   });
 });
@@ -288,7 +296,7 @@ app.get('/:id/:word_id', function(req, res) {
       res.render('question.jade', {
         user : user,
         word : word,
-        flash : flash()
+        flash : req.flash()
       });
     });
   });
@@ -312,7 +320,7 @@ app.post('/:id/:word_id', function(req, res) {
         word : word,
         sugestion : req.body.translation,
         correct : (word.translation === req.body.translation),
-        flash : flash()
+        flash : req.flash()
       });
     });
   });
@@ -366,7 +374,7 @@ var timer = function() {
 
 // setInterval(timer(), 10000);
 
-// setInterval(timer, 21600000);
+setInterval(timer, 21600000);
 
 var server = app.listen(port, function() {
   logger.info("Listening on %d", port);
