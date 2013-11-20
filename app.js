@@ -375,7 +375,7 @@ var timer = function() {
 
 var server = app.listen(port, function() {
   logger.info("Listening on %d", port);
-  var rule = new schedule.RecurrenceRule(null/* year */, null/* month */, null/* date */, null/* dayOfWeek */, [ 8, 13, 17, 21 ]/* hour */, null/* minute */, null/* second */);
+  var rule = new schedule.RecurrenceRule(null/* year */, null/* month */, null/* date */, null/* dayOfWeek */, [ 8, 13, 17, 21 ]/* hour */, 0/* minute */, null/* second */);
   var j = schedule.scheduleJob(rule, timer());
   console.log(j);
 });
