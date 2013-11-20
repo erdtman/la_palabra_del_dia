@@ -1,9 +1,9 @@
 {
-  "name": "serenity_service",
+  "name": "la_palabra_del_dia",
   "version": "0.0.1",
   "repository": {
     "type":"git",
-    "url":"ssh://git@bitbucket.org/samuelerdtman/serenity_service"
+    "url":"https://github.com/samuelerdtman/la_palabra_del_dia.git"
   },
   "dependencies": {
     "express": "3.4.x",
