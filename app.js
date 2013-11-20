@@ -3,6 +3,7 @@ var flash = require('connect-flash');
 var storage = require('./storage.js').storage;
 var logger = require('./logger.js').logger;
 var util = require('util');
+var schedule = require('node-schedule');
 var shortId = require('shortid');
 shortId.seed(347826593478562);
 
@@ -372,10 +373,9 @@ var timer = function() {
   };
 };
 
-setTimeout(timer(), 10000);
-
-setInterval(timer, 21600000);
-
 var server = app.listen(port, function() {
   logger.info("Listening on %d", port);
+  var rule = new schedule.RecurrenceRule(null/* year */, null/* month */, null/* date */, null/* dayOfWeek */, [ 8, 13, 17, 21 ]/* hour */, null/* minute */, null/* second */);
+  var j = schedule.scheduleJob(rule, timer());
+  console.log(j);
 });
