@@ -8,8 +8,10 @@ StorageProvider = function(url) {
   mongo.connect(url, {}, function(error, db) {
     if (error) {
       logger.error("Failed to connect to database, %s", error);
+      return;
     } else {
       logger.info("Connection to database established");
+
     }
     that.db = db;
     that.db.addListener("error", function(error) {
@@ -82,8 +84,12 @@ StorageProvider.prototype.findAllBy = function(type, query, callback, limit, sor
   });
 };
 
-StorageProvider.prototype.findAllWordsBy = function(query, callback, limit) {
-  this.findAllBy("words", query, callback, limit);
+StorageProvider.prototype.findAllWordsBy = function(query, callback, limit, sort) {
+  this.findAllBy("words", query, callback, limit, sort);
+};
+
+StorageProvider.prototype.findAllUsersBy = function(query, callback, limit) {
+  this.findAllBy("wordusers", query, callback, limit);
 };
 
 /**
@@ -128,8 +134,8 @@ StorageProvider.prototype.deleteOne = function(type, data, callback) {
   });
 };
 
-StorageProvider.prototype.deleteWord = function(device, callback) {
-  this.deleteOne("words", device, callback);
+StorageProvider.prototype.deleteWord = function(word, callback) {
+  this.deleteOne("words", word, callback);
 };
 
 StorageProvider.prototype.deleteUser = function(user, callback) {

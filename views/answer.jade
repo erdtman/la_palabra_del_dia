@@ -1,0 +1,32 @@
+extends ../views/layout
+
+include ../views/showMessage.jade
+
+block head
+  link(rel='stylesheet', href='/static/bootstrap/css/callout.css')
+  title Answer - La palabra del día
+
+block content
+  h1 Answer
+  +showMessage()
+  
+  if !correct
+    div(class="bs-callout bs-callout-danger")
+      h4 Wrong
+      p 
+        strong #{word.word}
+        |  does not mean  
+        strong #{sugestion}
+        |  it means 
+        strong #{word.translation}
+        | . Better luck next time.
+  if correct
+    div(class="bs-callout bs-callout-info")
+      h4 Correct
+      p 
+        strong #{word.word}
+        |  means 
+        strong #{word.translation}
+        | . You are learning quickly.
+  
+block footer

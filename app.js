@@ -2,8 +2,15 @@ var express = require('express');
 var flash = require('connect-flash');
 var storage = require('./storage.js').storage;
 var logger = require('./logger.js').logger;
-var ObjectID = require('mongodb').ObjectID;
 var util = require('util');
+var shortId = require('shortid');
+shortId.seed(347826593478562);
+
+var push = require('pushover-notifications');
+var pushover = new push({
+  token : process.env.PUSHOVER_TOKEN || "aJoQk1Hxap1FLnRq56KRWSDkTdPuWS",
+  debug : true
+});
 
 var nodemailer = require("nodemailer");
 var smtpTransport = nodemailer.createTransport("SMTP", {
@@ -67,6 +74,7 @@ app.post('/create', function(req, res) {
     } else {
       console.log("user not found create");
       storage.saveUser({
+        _id : shortId.generate(),
         email : req.body.email,
         created : new Date()
       }, function(error, user) {
@@ -92,15 +100,8 @@ app.post('/create', function(req, res) {
 });
 
 app.get('/:id', function(req, res) {
-  try {
-    ObjectID(req.params.id);
-  } catch (e) {
-    req.flash("error", "Unkonwn account!");
-    return res.redirect("/");
-  }
-
   storage.findOneUserBy({
-    _id : ObjectID(req.params.id)
+    _id : req.params.id
   }, function(error, user) {
     console.log(error);
     console.log(user);
@@ -116,15 +117,8 @@ app.get('/:id', function(req, res) {
 });
 
 app.get('/:id/add', function(req, res) {
-  try {
-    ObjectID(req.params.id);
-  } catch (e) {
-    req.flash("error", "Unkonwn account!");
-    return res.redirect("/");
-  }
-
   storage.findOneUserBy({
-    _id : ObjectID(req.params.id)
+    _id : req.params.id
   }, function(error, user) {
     console.log(error);
     console.log(user);
@@ -141,15 +135,8 @@ app.get('/:id/add', function(req, res) {
 });
 
 app.post('/:id/add', function(req, res) {
-  try {
-    ObjectID(req.params.id);
-  } catch (e) {
-    req.flash("error", "Unkonwn account!");
-    return res.redirect("/");
-  }
-
   storage.findOneUserBy({
-    _id : ObjectID(req.params.id)
+    _id : req.params.id
   }, function(error, user) {
 
     if (!user) {
@@ -157,30 +144,24 @@ app.post('/:id/add', function(req, res) {
       return res.redirect("/");
     }
     storage.saveWord({
+      _id : shortId.generate(),
       word : req.body.word,
       translation : req.body.translation,
       owner : req.params.id,
       created : new Date,
-      tests : 20
+      tests : 0
     }, function(error, word) {
       console.log(word);
       req.flash("error", "'" + word.word + "' has been added");
-      res.redirect("/" + req.params.id);
+      res.redirect("/" + req.params.id + "/add");
     });
   });
 });
 
 app.get('/:id/unknown', function(req, res) {
-  console.log("unknown");
-  try {
-    ObjectID(req.params.id);
-  } catch (e) {
-    req.flash("error", "Unkonwn account!");
-    return res.redirect("/");
-  }
 
   storage.findOneUserBy({
-    _id : ObjectID(req.params.id)
+    _id : req.params.id
   }, function(error, user) {
 
     if (!user) {
@@ -189,7 +170,7 @@ app.get('/:id/unknown', function(req, res) {
     }
 
     storage.findAllWordsBy({
-      owner : "" + user._id,
+      owner : user._id,
       tests : {
         $lte : 16
       }
@@ -205,15 +186,9 @@ app.get('/:id/unknown', function(req, res) {
 });
 
 app.get('/:id/known', function(req, res) {
-  try {
-    ObjectID(req.params.id);
-  } catch (e) {
-    req.flash("error", "Unkonwn account!");
-    return res.redirect("/");
-  }
 
   storage.findOneUserBy({
-    _id : ObjectID(req.params.id)
+    _id : req.params.id
   }, function(error, user) {
     if (!user) {
       req.flash("error", "Unkonwn account!");
@@ -221,7 +196,7 @@ app.get('/:id/known', function(req, res) {
     }
 
     storage.findAllWordsBy({
-      owner : "" + user._id,
+      owner : user._id,
       tests : {
         $gt : 16
       }
@@ -237,15 +212,8 @@ app.get('/:id/known', function(req, res) {
 });
 
 app.get('/:id/settings', function(req, res) {
-  try {
-    ObjectID(req.params.id);
-  } catch (e) {
-    req.flash("error", "Unkonwn account!");
-    return res.redirect("/");
-  }
-
   storage.findOneUserBy({
-    _id : ObjectID(req.params.id)
+    _id : req.params.id
   }, function(error, user) {
     if (!user) {
       req.flash("error", "Unkonwn account!");
@@ -260,15 +228,8 @@ app.get('/:id/settings', function(req, res) {
 });
 
 app.post('/:id/settings', function(req, res) {
-  try {
-    ObjectID(req.params.id);
-  } catch (e) {
-    req.flash("error", "Unkonwn account!");
-    return res.redirect("/");
-  }
-
   storage.findOneUserBy({
-    _id : ObjectID(req.params.id)
+    _id : req.params.id
   }, function(error, user) {
     if (!user) {
       req.flash("error", "Unkonwn account!");
@@ -277,14 +238,135 @@ app.post('/:id/settings', function(req, res) {
 
     user.email = req.body.email;
     user.pushover_id = req.body.pushover_id;
-    user.words_per_day = req.body.words_per_day;
+    user.words_per_day = parseInt(req.body.words_per_day);
     console.log(user);
     storage.updateUser(user, function(error, updatedUser) {
       req.flash("success", "Settigs has been saved!");
-      return res.redirect("/" + user._id);
+      return res.redirect("/" + user._id + "/settings");
     });
   });
 });
+
+app.post('/:id/delete/:word_id', function(req, res) {
+  storage.findOneUserBy({
+    _id : req.params.id
+  }, function(error, user) {
+    if (!user) {
+      req.flash("error", "Unkonwn account!");
+      return res.redirect("/");
+    }
+
+    console.log(user);
+    console.log(req.params);
+    storage.deleteWord({
+      _id : req.params.word_id,
+      owner : req.params.id
+    }, function(error, deltedWord) {
+      if (deltedWord) {
+        req.flash("success", "Word, '" + deltedWord.word + "', has been deleted.");
+      } else {
+        req.flash("error", "Failed to delete word");
+      }
+      return res.redirect(req.headers.referer ? req.headers.referer : "/" + user._id);
+    });
+  });
+});
+
+app.get('/:id/:word_id', function(req, res) {
+  storage.findOneUserBy({
+    _id : req.params.id
+  }, function(error, user) {
+    if (!user) {
+      req.flash("error", "Unkonwn account!");
+      return res.redirect("/");
+    }
+
+    storage.findOneWordBy({
+      _id : req.params.word_id,
+      owner : req.params.id
+    }, function(error, word) {
+      res.render('question.jade', {
+        user : user,
+        word : word,
+        flash : flash()
+      });
+    });
+  });
+});
+
+app.post('/:id/:word_id', function(req, res) {
+  storage.findOneUserBy({
+    _id : req.params.id
+  }, function(error, user) {
+    if (!user) {
+      req.flash("error", "Unkonwn account!");
+      return res.redirect("/");
+    }
+
+    storage.findOneWordBy({
+      _id : req.params.word_id,
+      owner : req.params.id
+    }, function(error, word) {
+      res.render('answer.jade', {
+        user : user,
+        word : word,
+        sugestion : req.body.translation,
+        correct : (word.translation === req.body.translation),
+        flash : flash()
+      });
+    });
+  });
+});
+
+var timer = function() {
+  var counter = 0;
+  var sendTo = function(user) {
+    storage.findAllWordsBy({
+      owner : user._id,
+      tests : {
+        $lte : 16
+      }
+    }, function(error, words) {
+      if (words.lenght === 0) {
+        console.log("found no words");
+        return;
+      }
+      var index = Math.floor(Math.random() * words.length);
+      var word = words[index];
+
+      console.log("Send word: %j", word);
+
+      pushover.send({
+        user : user.pushover_id,
+        message : util.format("http://lapalabradeldia.herokuapp.com/%s/%s", user._id, word._id),
+        title : util.format("The word '%s'. ", word.word),
+      }, function(error, result) {
+        console.log("error: %j", error);
+        console.log("result: %j", result);
+      });
+
+    });
+  };
+
+  return function() {
+    counter = (counter) % 4 + 1;
+    console.log("Sending %d", counter);
+    storage.findAllUsersBy({
+      words_per_day : {
+        $gte : counter
+      }
+    }, function(error, users) {
+      for ( var i = 0; i < users.length; i++) {
+        console.log("sending to: %s", users[i].email);
+        sendTo(users[i]);
+      }
+    });
+  };
+};
+
+// setInterval(timer(), 10000);
+
+// setInterval(timer, 21600000);
 
 var server = app.listen(port, function() {
   logger.info("Listening on %d", port);

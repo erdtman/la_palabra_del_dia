@@ -13,7 +13,8 @@
     "jade" : "0.35.x",
     "winston": "0.7.x",
     "pushover-notifications" : "0.1.x",
-    "nodemailer" : "0.5.x"
+    "nodemailer" : "0.5.x",
+    "shortid" : "2.0.x"
   },
   "engines": {
     "node": "0.10.21",
