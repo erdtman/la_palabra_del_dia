@@ -372,7 +372,7 @@ var timer = function() {
   };
 };
 
-// setInterval(timer(), 10000);
+setTimeout(timer(), 10000);
 
 setInterval(timer, 21600000);
 
