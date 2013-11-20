@@ -9,7 +9,6 @@ shortId.seed(347826593478562);
 var push = require('pushover-notifications');
 var pushover = new push({
   token : process.env.PUSHOVER_TOKEN || "aJoQk1Hxap1FLnRq56KRWSDkTdPuWS",
-  debug : true
 });
 
 var nodemailer = require("nodemailer");
@@ -57,10 +56,9 @@ app.get('/', function(req, res) {
 });
 
 app.post('/create', function(req, res) {
-  // TODO validate email
   console.log("req.body: %j", req.body);
   storage.findOneUserBy({
-    email : req.body.email
+    email : req.body.email.toLowerCase()
   }, function(error, user) {
     if (user) {
       console.log("user found: %j", user);
@@ -68,7 +66,7 @@ app.post('/create', function(req, res) {
         from : "La palabra del día <palabra@erdtman.se>",
         to : user.email,
         subject : "Account",
-        text : util.format("http://lapalabradeldia.herokuapp.com/%s", user._id)
+        text : util.format("Welcome to La palabra del día this is your account link http://lapalabradeldia.herokuapp.com/%s", user._id)
       }, function(error, response) {
         if (error) {
           console.log(error);
@@ -83,7 +81,7 @@ app.post('/create', function(req, res) {
       console.log("user not found create");
       storage.saveUser({
         _id : shortId.generate(),
-        email : req.body.email,
+        email : req.body.email.toLowerCase(),
         created : new Date()
       }, function(error, user) {
         console.log("user created, %j", user);
@@ -153,8 +151,8 @@ app.post('/:id/add', function(req, res) {
     }
     storage.saveWord({
       _id : shortId.generate(),
-      word : req.body.word,
-      translation : req.body.translation,
+      word : req.body.word.toLowerCase(),
+      translation : req.body.translation.toLowerCase(),
       owner : req.params.id,
       created : new Date,
       tests : 0
@@ -244,7 +242,7 @@ app.post('/:id/settings', function(req, res) {
       return res.redirect("/");
     }
 
-    user.email = req.body.email;
+    user.email = req.body.email.toLowerCase();
     user.pushover_id = req.body.pushover_id;
     user.words_per_day = parseInt(req.body.words_per_day);
     console.log(user);
@@ -270,11 +268,7 @@ app.post('/:id/delete/:word_id', function(req, res) {
       _id : req.params.word_id,
       owner : req.params.id
     }, function(error, deltedWord) {
-      if (deltedWord) {
-        req.flash("success", "Word, '" + deltedWord.word + "', has been deleted.");
-      } else {
-        req.flash("error", "Failed to delete word");
-      }
+      req.flash("success", "Word has been deleted.");
       return res.redirect(req.headers.referer ? req.headers.referer : "/" + user._id);
     });
   });
@@ -318,10 +312,16 @@ app.post('/:id/:word_id', function(req, res) {
       res.render('answer.jade', {
         user : user,
         word : word,
-        sugestion : req.body.translation,
-        correct : (word.translation === req.body.translation),
+        sugestion : req.body.translation.toLowerCase(),
+        correct : (word.translation === req.body.translation.toLowerCase()),
         flash : req.flash()
       });
+
+      if (word.translation === req.body.translation.toLowerCase()) {
+        word.tests++;
+        storage.updateWord(word, function(error, updatedWord) {
+        });
+      }
     });
   });
 });
