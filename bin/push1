@@ -1,0 +1,5 @@
+#! /app/bin/node
+
+var pusher = require('../pusher.js').pusher;
+
+setTimeout(pusher(1), 1000);
