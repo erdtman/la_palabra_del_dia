@@ -3,14 +3,8 @@ var flash = require('connect-flash');
 var storage = require('./storage.js').storage;
 var logger = require('./logger.js').logger;
 var util = require('util');
-var schedule = require('node-schedule');
 var shortId = require('shortid');
 shortId.seed(347826593478562);
-
-var push = require('pushover-notifications');
-var pushover = new push({
-  token : process.env.PUSHOVER_TOKEN || "aJoQk1Hxap1FLnRq56KRWSDkTdPuWS",
-});
 
 var nodemailer = require("nodemailer");
 var smtpTransport = nodemailer.createTransport("SMTP", {
@@ -310,15 +304,26 @@ app.post('/:id/:word_id', function(req, res) {
       _id : req.params.word_id,
       owner : req.params.id
     }, function(error, word) {
+      var correct = function(translation, guess) {
+        var translations = translation.split(",");
+        for ( var i = 0; i < translations.length; i++) {
+          if (translations[i].trim() === guess.trim()) {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      var isCorrect = correct(word.translation, req.body.translation.toLowerCase());
       res.render('answer.jade', {
         user : user,
         word : word,
         sugestion : req.body.translation.toLowerCase(),
-        correct : (word.translation === req.body.translation.toLowerCase()),
+        correct : isCorrect,
         flash : req.flash()
       });
 
-      if (word.translation === req.body.translation.toLowerCase()) {
+      if (isCorrect) {
         word.tests++;
         storage.updateWord(word, function(error, updatedWord) {
         });
@@ -327,55 +332,6 @@ app.post('/:id/:word_id', function(req, res) {
   });
 });
 
-var timer = function() {
-  var counter = 0;
-  var sendTo = function(user) {
-    storage.findAllWordsBy({
-      owner : user._id,
-      tests : {
-        $lte : 16
-      }
-    }, function(error, words) {
-      if (words.lenght === 0) {
-        console.log("found no words");
-        return;
-      }
-      var index = Math.floor(Math.random() * words.length);
-      var word = words[index];
-
-      console.log("Send word: %j", word);
-
-      pushover.send({
-        user : user.pushover_id,
-        message : util.format("http://palabra.herokuapp.com/%s/%s", user._id, word._id),
-        title : util.format("The word '%s'. ", word.word),
-      }, function(error, result) {
-        console.log("error: %j", error);
-        console.log("result: %j", result);
-      });
-
-    });
-  };
-
-  return function() {
-    counter = (counter) % 4 + 1;
-    console.log("Sending %d", counter);
-    storage.findAllUsersBy({
-      words_per_day : {
-        $gte : counter
-      }
-    }, function(error, users) {
-      for ( var i = 0; i < users.length; i++) {
-        console.log("sending to: %s", users[i].email);
-        sendTo(users[i]);
-      }
-    });
-  };
-};
-
 var server = app.listen(port, function() {
   logger.info("Listening on %d", port);
-  var rule = new schedule.RecurrenceRule(null/* year */, null/* month */, null/* date */, null/* dayOfWeek */, [ 8, 13, 17, 21 ]/* hour */, 0/* minute */, null/* second */);
-  var j = schedule.scheduleJob(rule, timer());
-  console.log(j);
 });

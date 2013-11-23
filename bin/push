@@ -1,6 +1,0 @@
-#! /app/bin/node
-var storage = require('../storage.js').storage;
-function sayHello() {
-  console.log('Hello');
-}
-sayHello();

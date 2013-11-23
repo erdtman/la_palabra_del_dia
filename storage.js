@@ -214,5 +214,8 @@ StorageProvider.prototype.dropDatabase = function(callback) {
   this.dropCollection("wordusers", latch);
 };
 
+StorageProvider.prototype.close = function(type, callback) {
+  this.db.close();
+};
 var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/mydb';
 exports.storage = new StorageProvider(mongoUri);
