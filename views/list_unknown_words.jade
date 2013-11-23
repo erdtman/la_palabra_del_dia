@@ -17,11 +17,11 @@ block content
     div(class="col-xs-4")
   hr
   each word in words
-    div(class="row" style="height:1cm")
+    div(class="row")
       div(class="col-xs-3"): strong #{word.word}
       div(class="col-xs-7") #{word.translation}
       div(class="col-xs-2")
-        form(action="/#{user._id}/delete/#{word._id}" method="post" class="pull-right")
+        form(action="/#{user._id}/delete/#{word._id}" style="height:1cm" method="post" class="pull-right")
           button(class="btn btn-danger" type="submit" style="margin-left:5px;")
             span(class="glyphicon glyphicon-trash")
 
