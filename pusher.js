@@ -43,6 +43,10 @@ exports.pusher = function(counter) {
     }, function(error, users) {
       for ( var i = 0; i < users.length; i++) {
         console.log("sending to: %s", users[i].email);
+        if (!users[i].pushover_id) {
+          console.log("no pushover id skipping");
+          continue;
+        }
         sendTo(users[i]);
       }
     });
