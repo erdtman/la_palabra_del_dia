@@ -3,8 +3,6 @@ var flash = require('connect-flash');
 var storage = require('./storage.js').storage;
 var logger = require('./logger.js').logger;
 var util = require('util');
-var shortId = require('shortid');
-shortId.seed(347826593478562);
 
 var nodemailer = require("nodemailer");
 var smtpTransport = nodemailer.createTransport("SMTP", {
@@ -75,7 +73,6 @@ app.post('/create', function(req, res) {
     } else {
       console.log("user not found create");
       storage.saveUser({
-        _id : shortId.generate(),
         email : req.body.email.toLowerCase(),
         created : new Date()
       }, function(error, user) {
@@ -145,7 +142,6 @@ app.post('/:id/add', function(req, res) {
       return res.redirect("/");
     }
     storage.saveWord({
-      _id : shortId.generate(),
       word : req.body.word.toLowerCase(),
       translation : req.body.translation.toLowerCase(),
       owner : req.params.id,

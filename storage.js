@@ -1,6 +1,7 @@
 var mongo = require('mongodb');
-var ObjectID = require('mongodb').ObjectID;
 var logger = require("./logger.js").logger;
+var shortId = require('shortid');
+shortId.seed(347826593478562);
 
 StorageProvider = function(url) {
   var that = this;
@@ -100,8 +101,9 @@ StorageProvider.prototype.save = function(type, data, callback) {
     if (error) {
       callback(error);
     } else {
-      collection.insert(data, function(error) {
-        callback(null, data);
+      data._id = shortId.generate();
+      collection.insert(data, function(error, result) {
+        callback(error, result);
       });
     }
   });
