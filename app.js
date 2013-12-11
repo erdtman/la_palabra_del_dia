@@ -210,7 +210,7 @@ app.get('/:id/badge', function(req, res) {
     }
   }, function(unknown_words) {
     res.header("Content-Type", "application/xml");
-    res.send(util.format('<?xml version="1.0" encoding="utf-8" ?><badge value="%d"/>', unknown_words));
+    res.send(util.format('<?xml version="1.0" encoding="utf-8" ?>\n<badge value="%d"/>', unknown_words));
   });
 });
 
