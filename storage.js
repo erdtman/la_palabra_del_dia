@@ -60,6 +60,29 @@ StorageProvider.prototype.findOneUserBy = function(querie, callback) {
 };
 
 /**
+ * Count
+ */
+StorageProvider.prototype.countBy = function(type, querie, callback) {
+  this.getCollection(type, function(error, collection) {
+    if (error) {
+      callback(0);
+    } else {
+      collection.count(querie, function(err, count) {
+        callback(count);
+      });
+    }
+  });
+};
+
+StorageProvider.prototype.countWordsBy = function(querie, callback) {
+  return this.countBy("words", querie, callback);
+};
+
+StorageProvider.prototype.countUsersBy = function(querie, callback) {
+  return this.countBy("wordusers", querie, callback);
+};
+
+/**
  * Find all by
  */
 StorageProvider.prototype.findAllBy = function(type, query, callback, limit, sort) {

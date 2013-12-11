@@ -45,10 +45,12 @@ app.get('/', function(req, res) {
 });
 
 app.post('/create', function(req, res) {
+  console.log("Create" + req.body.email);
   storage.findOneUserBy({
     email : req.body.email.toLowerCase()
   }, function(error, user) {
     if (user) {
+      console.log("User found");
       smtpTransport.sendMail({
         from : "La palabra del día <palabra@erdtman.se>",
         to : user.email,
@@ -65,6 +67,7 @@ app.post('/create', function(req, res) {
         return res.redirect("/");
       });
     } else {
+      console.log("User not found");
       storage.saveUser({
         email : req.body.email.toLowerCase(),
         created : new Date()
@@ -93,7 +96,6 @@ var setupUser = function(req, res, next) {
   if (req.params.id == "static") {
     return next();
   }
-
   storage.findOneUserBy({
     _id : req.params.id
   }, function(error, user) {
@@ -102,12 +104,13 @@ var setupUser = function(req, res, next) {
       return res.redirect("/");
     }
     req.user = user;
+    res.locals.user = user;
     return next();
   });
 };
 
-app.get('/:id/*', setupUser);
 app.get('/:id', setupUser);
+app.get('/:id/*', setupUser);
 app.post('/:id/*', setupUser);
 
 app.get('/:id', function(req, res) {
@@ -196,6 +199,18 @@ app.post('/:id/delete/:word_id', function(req, res) {
   }, function(error, deltedWord) {
     req.flash("success", "Word has been deleted.");
     return res.redirect(req.headers.referer ? req.headers.referer : "/" + req.user._id);
+  });
+});
+
+app.get('/:id/badge', function(req, res) {
+  storage.countWordsBy({
+    owner : req.user._id,
+    tests : {
+      $lte : 16
+    }
+  }, function(unknown_words) {
+    res.header("Content-Type", "application/xml");
+    res.send(util.format('<?xml version="1.0" encoding="utf-8" ?><badge value="%d"/>', unknown_words));
   });
 });
 
