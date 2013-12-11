@@ -163,7 +163,7 @@ app.get('/:id/known', function(req, res) {
   }, function(error, words) {
     console.log("known words: %j", words);
     res.render('list_known.jade', {
-      user : user,
+      user : req.user,
       words : words,
       flash : req.flash()
     });
@@ -204,6 +204,7 @@ app.get('/:id/:word_id', function(req, res) {
     _id : req.params.word_id,
     owner : req.params.id
   }, function(error, word) {
+    console.log(word);
     res.render('question.jade', {
       user : req.user,
       word : word,
