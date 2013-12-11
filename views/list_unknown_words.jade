@@ -10,16 +10,16 @@ block content
   +showMessage()
   
   div(class="row")
-    div(class="col-xs-4")
-      strong Word
-    div(class="col-xs-4") 
-      strong Translation
-    div(class="col-xs-4")
+    div(class="col-xs-3"): strong Word
+    div(class="col-xs-6"): strong Translation
+    div(class="col-xs-1"): strong Success
+    div(class="col-xs-2")
   hr
   each word in words
     div(class="row")
       div(class="col-xs-3"): strong #{word.word}
-      div(class="col-xs-7") #{word.translation}
+      div(class="col-xs-6") #{word.translation}
+      div(class="col-xs-1") #{word.tests}
       div(class="col-xs-2")
         form(action="/#{user._id}/delete/#{word._id}" style="height:1cm" method="post" class="pull-right")
           button(class="btn btn-danger" type="submit" style="margin-left:5px;")
