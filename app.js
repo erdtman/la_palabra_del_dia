@@ -38,6 +38,12 @@ app.get('/clear', function(req, res) {
   });
 });
 
+app.get('/listusers', function(req, res) {
+  storage.findAllUsersBy({}, function(error, users) {
+    res.json(users);
+  });
+});
+
 app.get('/', function(req, res) {
   res.render('start.jade', {
     flash : req.flash()
@@ -114,9 +120,25 @@ app.get('/:id/*', setupUser);
 app.post('/:id/*', setupUser);
 
 app.get('/:id', function(req, res) {
-  res.render('start_internal.jade', {
-    user : req.user,
-    flash : req.flash()
+  storage.countWordsBy({
+    owner : req.user._id,
+    tests : {
+      $lte : 16
+    }
+  }, function(unknown_words) {
+    storage.countWordsBy({
+      owner : req.user._id,
+      tests : {
+        $gt : 16
+      }
+    }, function(known_words) {
+      res.render('start_internal.jade', {
+        user : req.user,
+        flash : req.flash(),
+        known_words : known_words,
+        unknown_words : unknown_words
+      });
+    });
   });
 });
 
@@ -254,9 +276,14 @@ app.post('/:id/:word_id', function(req, res) {
 
     if (isCorrect) {
       word.tests++;
-      storage.updateWord(word, function(error, updatedWord) {
-      });
+    } else if (word.failed_tests) {
+      word.failed_tests++;
+    } else {
+      word.failed_tests = 1;
     }
+
+    storage.updateWord(word, function(error, updatedWord) {
+    });
   });
 });
 
