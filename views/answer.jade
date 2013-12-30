@@ -28,5 +28,12 @@ block content
         |  means 
         strong #{word.translation}
         | . You are learning quickly.
-  
+  if training
+    div(class="row")
+      div(class="col-xs-1 col-sm-2 col-md-3")
+      div(class="col-xs-10 col-sm-8 col-md-6")
+        a( href="/#{user._id}/training" class="btn btn-primary btn-lg btn-block")
+          | Next  
+          span( class="glyphicon glyphicon glyphicon-chevron-right")
+      div(class="col-xs-1 col-sm-2 col-md-3")
 block footer

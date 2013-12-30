@@ -155,7 +155,8 @@ app.post('/:id/add', function(req, res) {
     translation : req.body.translation.toLowerCase(),
     owner : req.user._id,
     created : new Date,
-    tests : 0
+    tests : 0,
+    failed_tests : 0
   }, function(error, word) {
     console.log(word);
     req.flash("success", "'" + word[0].word + "' has been added");
@@ -236,6 +237,30 @@ app.get('/:id/badge', function(req, res) {
   });
 });
 
+app.get('/:id/training', function(req, res) {
+  function getWord(user, callback) {
+    storage.findAllWordsBy({
+      owner : user._id,
+      tests : {
+        $lte : 16
+      }
+    }, function(error, words) {
+      if (words.lenght === 0) {
+        console.log("found no words");
+        return callback(1);
+      }
+      var index = Math.floor(Math.random() * words.length);
+      var word = words[index];
+      console.log("Returning word: %j", word);
+      callback(null, word);
+    });
+  }
+
+  getWord(req.user, function(error, word) {
+    res.redirect("/" + req.user._id + "/" + word._id + "?training=true");
+  });
+});
+
 app.get('/:id/:word_id', function(req, res) {
   storage.findOneWordBy({
     _id : req.params.word_id,
@@ -266,13 +291,6 @@ app.post('/:id/:word_id', function(req, res) {
     };
 
     var isCorrect = correct(word.translation, req.body.translation.toLowerCase());
-    res.render('answer.jade', {
-      user : req.user,
-      word : word,
-      sugestion : req.body.translation.toLowerCase(),
-      correct : isCorrect,
-      flash : req.flash()
-    });
 
     if (isCorrect) {
       word.tests++;
@@ -283,6 +301,14 @@ app.post('/:id/:word_id', function(req, res) {
     }
 
     storage.updateWord(word, function(error, updatedWord) {
+      res.render('answer.jade', {
+        user : req.user,
+        word : word,
+        sugestion : req.body.translation.toLowerCase(),
+        correct : isCorrect,
+        flash : req.flash(),
+        training : req.query.training
+      });
     });
   });
 });
