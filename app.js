@@ -1,9 +1,10 @@
 var express = require('express');
 var flash = require('connect-flash');
-var storage = require('./storage.js').storage;
-var logger = require('./logger.js').logger;
 var util = require('util');
 
+var storage = require('./storage.js').storage;
+var logger = require('./logger.js').logger;
+var force_https = require('./force-https.js').create();
 var nodemailer = require("nodemailer");
 var smtpTransport = nodemailer.createTransport("SMTP", {
   service : "Gmail",
@@ -24,6 +25,7 @@ app.configure(function() {
   app.use(express.cookieParser('keyboard cat'));
   app.use(express.session());
   app.use(flash());
+  app.use(force_https);
   app.use(app.router);
   app.use("/static", express.static(__dirname + '/static'));
   app.use(express.errorHandler({
