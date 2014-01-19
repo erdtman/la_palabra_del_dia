@@ -1,6 +1,7 @@
 var express = require('express');
 var flash = require('connect-flash');
 var util = require('util');
+var sts = require('strict-transport-security');
 
 var storage = require('./storage.js').storage;
 var logger = require('./logger.js').logger;
@@ -26,6 +27,11 @@ app.configure(function() {
   app.use(express.session());
   app.use(flash());
   app.use(force_https);
+  app.use(sts.getSTS({
+    "max-age" : {
+      days : 30
+    }
+  }));
   app.use(app.router);
   app.use("/static", express.static(__dirname + '/static'));
   app.use(express.errorHandler({
